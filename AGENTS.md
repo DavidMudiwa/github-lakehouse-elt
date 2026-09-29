@@ -45,9 +45,19 @@ Phase 2 = GitHub → Dagster → GCS → BigQuery (asset chain: raw → parquet 
 - Backfills cost ~1 request per partition (+pagination). Unauthenticated GitHub
   is 60 req/hr, so backfill small ranges until a `GITHUB_TOKEN` resource exists.
 
+## Failure & recovery
+
+- All assets share `common/policies.py::RETRY_POLICY`: 3 retries, 5s base delay,
+  exponential backoff + full jitter (spreads load, helps transient 5xx).
+- Recovery is safe because everything is idempotent: raw appends, processed
+  overwrites a deterministic key, bq replaces a single `dt` partition. Re-run the
+  failed asset or backfill the failed partition.
+- Asset checks (`assets/checks.py`) assert the BigQuery tables are non-empty and
+  have no rows missing `dt`. Run standalone via `scripts/run_checks.py`.
+
 ## Schedules
 
-- `schedules/commits.py` defines `commits_daily_schedule` (cron `0 2 * * *`,
+- `schedules/commits.py` defines `commits_daily_schedule` (cron `0 9 * * *`,
   UTC) which requests **yesterday's** commits partition via `RunRequest`.
   Default status is STOPPED — enable it in the UI to arm it; the container's
   `SchedulerDaemon` must be running for it to fire.
@@ -120,6 +130,8 @@ Phase 2 = GitHub → Dagster → GCS → BigQuery (asset chain: raw → parquet 
 - Smoke-test the GCS resource round-trip: `uv run python scripts/check_gcs_resource.py`
 - Load/validate Definitions without the Dagster CLI: `uv run python scripts/validate_defs.py`
 - Check what partition the commits schedule would request: `uv run python scripts/check_schedule.py`
+- Run the BigQuery asset checks standalone: `uv run python scripts/run_checks.py`
+- Print the full asset graph (lineage, kinds, partitions, checks, schedules): `uv run python scripts/describe_graph.py`
 - Materialize the repositories asset locally (hits GitHub + GCS): `uv run python scripts/run_repositories_asset.py`
 - Materialize the commits asset locally; override with `PARTITION=YYYY-MM-DD` / `MAX_PAGES=N`: `uv run python scripts/run_commits_asset.py`
 - Materialize parquet assets locally (pulls raw upstream → hits GitHub); commits partition via `PARTITION=YYYY-MM-DD`: `uv run python scripts/run_parquet_assets.py`
@@ -133,6 +145,7 @@ Phase 2 = GitHub → Dagster → GCS → BigQuery (asset chain: raw → parquet 
 - `assets/github.py` — raw assets (GitHub API → GCS raw JSON)
 - `assets/processed.py` — processed assets (raw JSON → Parquet in GCS)
 - `assets/bigquery.py` — load assets (GCS Parquet → BigQuery)
+- `assets/checks.py` — asset checks; `common/policies.py` — shared retry policy
 - `resources/` — injectable external-system handles (`GCSResource`, `BigQueryResource`)
 - `common/keys.py` — GCS key/naming convention
 - `common/normalize.py` — raw record → warehouse contract (adds `dt`, parses timestamps)

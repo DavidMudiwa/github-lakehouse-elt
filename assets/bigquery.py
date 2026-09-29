@@ -4,12 +4,12 @@ from dagster import (
     AssetExecutionContext,
     AssetIn,
     MetadataValue,
-    RetryPolicy,
     asset,
 )
 
 from common.keys import COMMITS, REPOSITORIES, partition_date_from_key
 from common.partitions import COMMITS_PARTITIONS
+from common.policies import RETRY_POLICY
 from common.schemas import (
     COMMITS_CLUSTERING_FIELDS,
     COMMITS_PARTITION_FIELD,
@@ -25,7 +25,7 @@ from resources.gcs import GCSResource
 @asset(
     ins={"parquet_uri": AssetIn("github_repositories_parquet")},
     kinds={"bigquery"},
-    retry_policy=RetryPolicy(max_retries=3, delay=5),
+    retry_policy=RETRY_POLICY,
 )
 def github_repositories_bq(
     context: AssetExecutionContext,
@@ -64,7 +64,7 @@ def github_repositories_bq(
     ins={"parquet_uri": AssetIn("github_commits_parquet")},
     partitions_def=COMMITS_PARTITIONS,
     kinds={"bigquery"},
-    retry_policy=RetryPolicy(max_retries=3, delay=5),
+    retry_policy=RETRY_POLICY,
 )
 def github_commits_bq(
     context: AssetExecutionContext,

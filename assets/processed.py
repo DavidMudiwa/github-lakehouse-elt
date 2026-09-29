@@ -5,7 +5,6 @@ from dagster import (
     AssetIn,
     Config,
     MetadataValue,
-    RetryPolicy,
     asset,
 )
 
@@ -18,6 +17,7 @@ from common.keys import (
 from common.normalize import normalize_commit, normalize_repository
 from common.parquet import records_to_parquet_bytes
 from common.partitions import COMMITS_PARTITIONS
+from common.policies import RETRY_POLICY
 from common.schemas import COMMITS_SCHEMA, REPOSITORIES_SCHEMA, to_table_schema
 from resources.gcs import GCSResource
 
@@ -33,7 +33,7 @@ class CommitsProcessedConfig(Config):
 @asset(
     ins={"raw_uri": AssetIn("github_repositories_raw")},
     kinds={"gcs", "parquet"},
-    retry_policy=RetryPolicy(max_retries=3, delay=5),
+    retry_policy=RETRY_POLICY,
 )
 def github_repositories_parquet(
     context: AssetExecutionContext,
@@ -71,7 +71,7 @@ def github_repositories_parquet(
     ins={"raw_uri": AssetIn("github_commits_raw")},
     partitions_def=COMMITS_PARTITIONS,
     kinds={"gcs", "parquet"},
-    retry_policy=RetryPolicy(max_retries=3, delay=5),
+    retry_policy=RETRY_POLICY,
 )
 def github_commits_parquet(
     context: AssetExecutionContext,

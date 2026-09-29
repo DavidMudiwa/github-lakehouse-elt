@@ -5,12 +5,12 @@ from dagster import (
     AssetExecutionContext,
     Config,
     MetadataValue,
-    RetryPolicy,
     asset,
 )
 
 from common.keys import COMMITS, REPOSITORIES, raw_key
 from common.partitions import COMMITS_PARTITIONS
+from common.policies import RETRY_POLICY
 from resources.gcs import GCSResource
 
 
@@ -61,10 +61,7 @@ def extract_paginated(
 
 @asset(
     kinds={"github", "gcs"},
-    retry_policy=RetryPolicy(
-        max_retries=3,
-        delay=5,
-    ),
+    retry_policy=RETRY_POLICY,
 )
 def github_repositories_raw(
     context: AssetExecutionContext,
@@ -109,10 +106,7 @@ class CommitsConfig(Config):
 @asset(
     partitions_def=COMMITS_PARTITIONS,
     kinds={"github", "gcs"},
-    retry_policy=RetryPolicy(
-        max_retries=3,
-        delay=5,
-    ),
+    retry_policy=RETRY_POLICY,
 )
 def github_commits_raw(
     context: AssetExecutionContext,
