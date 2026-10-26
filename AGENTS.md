@@ -27,6 +27,11 @@ Phase 2 = GitHub → Dagster → GCS → BigQuery (asset chain: raw → parquet 
   returned `gs://` URI as an argument), so Dagster infers lineage and ordering.
 - Values pass between assets via `InMemoryIOManager` (we only shuttle URIs; real
   bytes live in GCS/BigQuery). Registered as `io_manager` in `Definitions`.
+- `Definitions(executor=in_process_executor)` is **required**: an in-memory IO
+  manager only works within a single process, but scheduler/daemon runs otherwise
+  use the multiprocess executor and fail to load upstream outputs
+  (`KeyError` in `mem_io_manager`). In-process is fine here — backfills still
+  parallelise across separate runs.
 - Consequence: materializing a downstream asset pulls its upstream chain. A
   standalone `materialize([...])` must include the full subgraph (see runners).
 - Assets carry `kinds` badges and rich output metadata: typed values

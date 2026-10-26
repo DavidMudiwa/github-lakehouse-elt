@@ -37,6 +37,12 @@ def main() -> None:
     for schedule in defs.schedules or []:
         print(f"  {schedule.name}  cron={schedule.cron_schedule}  status={schedule.default_status}")
 
+    print("Jobs")
+    repository = defs.get_repository_def()
+    for job in sorted(repository.get_all_jobs(), key=lambda job: job.name):
+        executor = job.executor_def.name if job.executor_def else "default"
+        print(f"  {job.name}  executor={executor}")
+
     print("Resources")
     for name in sorted(defs.resources):
         print(f"  {name}")

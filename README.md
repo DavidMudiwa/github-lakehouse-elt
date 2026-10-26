@@ -30,7 +30,10 @@ github_commits_raw ─────▶ github_commits_parquet ─────▶ 
 Lineage is declared with `AssetIn`: each downstream asset takes the upstream's
 returned `gs://` URI as an argument, so Dagster infers ordering and draws the
 graph. Small values (URIs) are carried between assets by an `InMemoryIOManager`;
-the real bytes live in GCS/BigQuery.
+the real bytes live in GCS/BigQuery. Because an in-memory IO manager only works
+in a single process, `Definitions(executor=in_process_executor)` is set — otherwise
+scheduler/daemon runs use the multiprocess executor and cannot load the upstream
+values.
 
 ## Tech stack
 
