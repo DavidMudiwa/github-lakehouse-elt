@@ -206,10 +206,11 @@ no bounded slice to checkpoint. Each run re-fetches the snapshot and writes it t
 that run day's `dt` partition (replacing that partition). Daily-partitioning the
 Dagster asset would only relabel today's data as an old day.
 
-**Limits and the future.** Partition based incremental works because the source
-is date-sliceable. A high-frequency or non-enumerable source needs a persisted
-**high-water mark** (last processed timestamp or ID) plus upserts, and must
-handle late-arriving data. That is Phase 3, with a time-based API.
+**Limits.** Partition-based incremental works because the source is
+date-sliceable. A high-frequency or non-enumerable source would instead need a
+persisted **high-water mark** (last processed timestamp or ID) plus upserts, and
+would have to handle late-arriving data. This project deliberately covers the
+partition-based case only.
 
 ## Orchestration
 
@@ -253,8 +254,8 @@ Three layers:
   warehouse tables are non-empty and contain no rows missing `dt`. Run them
   standalone with `scripts/run_checks.py`, or view their results in the UI.
 
-CI — running unit tests and definitions validation on every push — is on the
-roadmap.
+CI — running unit tests and definitions validation on every push — is not
+included here; the scripts above are run manually.
 
 ## Getting started
 
@@ -332,9 +333,8 @@ backfilling the narrowest unit.
 These are deliberate gaps with clear next steps: a token resource, a freshness
 check, and CI.
 
-## Roadmap
+## Status
 
-- **Phase 1** — GitHub API → local JSON.
-- **Phase 2** — GitHub → Dagster → GCS → BigQuery (this repo).
-- **Phase 3** — incremental ingestion with a time-based API (watermarks,
-  backfills) and dbt for warehouse modelling.
+This is a standalone, complete project: batch ingestion from the GitHub API
+through a raw → Parquet → BigQuery lakehouse pipeline. It is not planned to
+expand into additional phases.

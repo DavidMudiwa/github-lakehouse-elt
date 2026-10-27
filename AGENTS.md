@@ -6,8 +6,8 @@ This is a learning project. Optimize for my understanding, not for speed.
 
 - **Teach alongside every change.** For each major step explain the concept, the
   architecture, and *why* a decision was made before/while showing code.
-- **Stage by stage.** Do not jump ahead or implement future stages. Work the
-  phases in order (see Phase 2 plan) and stop for confirmation between stages.
+- **Incremental delivery.** Work in small, understandable steps and stop for
+  confirmation between them.
 - **I want to contribute.** Handle repetitive/boilerplate work, but leave the
   meaningful decisions, small edits, and reasoning to me. Ask me to make the
   interesting calls rather than doing everything.
@@ -18,8 +18,8 @@ This is a learning project. Optimize for my understanding, not for speed.
 
 ## Project
 
-Dagster ELT platform. Phase 1 = GitHub API → local JSON.
-Phase 2 = GitHub → Dagster → GCS → BigQuery (asset chain: raw → parquet → bq).
+A standalone Dagster ELT project: GitHub → Dagster → GCS → BigQuery
+(asset chain: raw → parquet → bq). Complete; no further phases are planned.
 
 ## Asset dependencies
 
@@ -106,7 +106,7 @@ Phase 2 = GitHub → Dagster → GCS → BigQuery (asset chain: raw → parquet 
   (project/dataset from env: `GOOGLE_CLOUD_PROJECT`, `BIGQUERY_DATASET`).
   Loads target a partition decorator (`table$YYYYMMDD`, `WRITE_TRUNCATE`) so
   re-runs replace only that partition (idempotent).
-- Phase 2 GCS bucket: `gs://github-data-492709` (region us-central1, uniform
+- GCS bucket: `gs://github-data-492709` (region us-central1, uniform
   bucket-level access, public access prevention, lifecycle
   raw/ only: STANDARD→NEARLINE@30d→COLDLINE@90d→ARCHIVE@365d; processed/ stays
   STANDARD, versioning off).
