@@ -333,8 +333,3 @@ backfilling the narrowest unit.
 These are deliberate gaps with clear next steps: a token resource, a freshness
 check, and CI.
 
-## Status
-
-This is a standalone, complete project: batch ingestion from the GitHub API
-through a raw → Parquet → BigQuery lakehouse pipeline. It is not planned to
-expand into additional phases.
