@@ -1,4 +1,5 @@
 from dagster import Definitions, InMemoryIOManager, in_process_executor
+
 from assets.bigquery import github_commits_bq, github_repositories_bq
 from assets.checks import commits_rows_present, repositories_rows_present
 from assets.github import github_commits_raw, github_repositories_raw
