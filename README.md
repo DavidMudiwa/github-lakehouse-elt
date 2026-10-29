@@ -1,5 +1,7 @@
 # GitHub Lakehouse ELT
 
+[![CI](https://github.com/DavidMudiwa/github-lakehouse-elt/actions/workflows/ci.yml/badge.svg)](https://github.com/DavidMudiwa/github-lakehouse-elt/actions/workflows/ci.yml)
+
 A batch, asset-first ELT pipeline built with **Dagster**. It pulls GitHub data
 into **Google Cloud Storage** (raw JSON → typed Parquet) and loads it into
 **BigQuery** for analytics.

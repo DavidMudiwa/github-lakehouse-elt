@@ -142,8 +142,14 @@ A standalone Dagster ELT project: GitHub → Dagster → GCS → BigQuery
 - Materialize parquet assets locally (pulls raw upstream → hits GitHub); commits partition via `PARTITION=YYYY-MM-DD`: `uv run python scripts/run_parquet_assets.py`
 - Materialize the BigQuery assets locally (pulls the whole chain → hits GitHub); commits partition via `PARTITION=YYYY-MM-DD`: `uv run python scripts/run_bigquery_assets.py`
 - Backfill a commits partition range in-process (capped at 5): `BACKFILL_START=2026-09-21 BACKFILL_END=2026-09-22 uv run python scripts/backfill_commits.py`
+- Lint: `uv run ruff check .` (config in `pyproject.toml`)
 - Run unit tests: `uv run python -m unittest discover -s tests -t . -v`
 - Add deps: `uv add <pkg>` (update `uv.lock`; Docker build uses `uv sync --frozen`)
+
+## CI
+
+- `.github/workflows/ci.yml` runs on push to `main` and on PRs: ruff, unit
+  tests, and `validate_defs.py` (no Docker/GCP needed; env placeholders only).
 
 ## Layout
 
