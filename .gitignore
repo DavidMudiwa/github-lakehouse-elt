@@ -224,3 +224,4 @@ __marimo__/
 data/
 __pycache__/
 secrets/
+*list.md
