@@ -68,6 +68,16 @@ A standalone Dagster ELT project: GitHub → Dagster → GCS → BigQuery
   `SchedulerDaemon` must be running for it to fire.
 - `commits_job` is an explicit asset job over the commits chain (raw→parquet→bq).
 
+## Alerting & freshness
+
+- `sensors/alerts.py::email_on_run_failure` (run-failure sensor, default RUNNING)
+  emails on any failed run. Configure `ALERT_EMAIL_FROM`, `ALERT_EMAIL_TO`,
+  `ALERT_EMAIL_PASSWORD`, and optionally `ALERT_SMTP_HOST`, `ALERT_SMTP_PORT`,
+  `ALERT_SMTP_TYPE` (SSL/STARTTLS), `ALERT_SMTP_USER`. If unconfigured it logs a
+  warning and sends nothing.
+- `assets/checks.py::commits_freshness` fails when the newest commits partition is
+  older than 36h (measured from the partition's UTC end).
+
 ## Data contracts
 
 - `common/schemas.py` holds explicit BigQuery column types plus partition/cluster fields.
@@ -162,6 +172,7 @@ A standalone Dagster ELT project: GitHub → Dagster → GCS → BigQuery
 - `common/normalize.py` — raw record → warehouse contract (adds `dt`, parses timestamps)
 - `common/parquet.py` — JSON→Parquet; `common/schemas.py` — explicit BQ schemas
 - `common/partitions.py` — Dagster partitions; `schedules/commits.py` — daily schedule/job
+- `sensors/alerts.py` — email alert on failed runs
 - `infra/` — cloud config as code (e.g. `gcs-lifecycle.json`)
 - `scripts/` — standalone verification/smoke-test helpers
 - `tests/` — stdlib `unittest` suite

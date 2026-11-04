@@ -14,7 +14,11 @@ if adc.exists():
 
 from dagster import build_asset_check_context  # noqa: E402
 
-from assets.checks import commits_rows_present, repositories_rows_present  # noqa: E402
+from assets.checks import (  # noqa: E402
+    commits_freshness,
+    commits_rows_present,
+    repositories_rows_present,
+)
 from resources.bigquery import BigQueryResource  # noqa: E402
 
 
@@ -25,6 +29,7 @@ def main() -> None:
     for name, check in (
         ("repositories_rows_present", repositories_rows_present),
         ("commits_rows_present", commits_rows_present),
+        ("commits_freshness", commits_freshness),
     ):
         result = check(context)
         print(f"{name}: passed={result.passed} metadata={result.metadata}")

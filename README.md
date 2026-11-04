@@ -185,8 +185,12 @@ Both tables are partitioned by `dt`; `commits` is clustered on `repository`.
 - `commits_daily_schedule` (cron `0 9 * * *`, UTC) requests **yesterday's**
   partition. It ships **STOPPED**; enable it in the UI to arm it (the
   `SchedulerDaemon` must be running).
-- Asset checks assert the BigQuery tables are non-empty and contain no rows
-  missing `dt`.
+- Asset checks assert the BigQuery tables are non-empty, contain no rows missing
+  `dt`, and that the newest commits partition is no older than **36 hours**
+  (freshness).
+- `sensors/alerts.py::email_on_run_failure` emails an alert address when any run
+  fails. It runs once the sensor daemon is up and is a no-op if email is not
+  configured.
 
 ## Incremental Processing
 
@@ -253,8 +257,9 @@ Three layers:
   schedule would request (`check_schedule.py`), and definitions loading
   (`validate_defs.py`). These are run manually against a sandbox GCP project.
 - **Data-quality tests** (`assets/checks.py`) — Dagster asset checks assert the
-  warehouse tables are non-empty and contain no rows missing `dt`. Run them
-  standalone with `scripts/run_checks.py`, or view their results in the UI.
+  warehouse tables are non-empty, contain no rows missing `dt`, and that the
+  commits data is fresh (newest partition ≤ 36h old). Run them standalone with
+  `scripts/run_checks.py`, or view their results in the UI.
 
 CI — running unit tests and definitions validation on every push — is not
 included here; the scripts above are run manually.
@@ -275,6 +280,11 @@ BIGQUERY_DATASET=github
 ```
 
 Place Application Default Credentials at `secrets/adc.json`.
+
+Optional email alerting on failed runs: set `ALERT_EMAIL_FROM` and
+`ALERT_EMAIL_TO`, plus `ALERT_EMAIL_PASSWORD` and optionally `ALERT_SMTP_HOST`,
+`ALERT_SMTP_PORT`, `ALERT_SMTP_TYPE` (`SSL`/`STARTTLS`), and `ALERT_SMTP_USER`.
+With those unset, the failure sensor logs a warning and sends nothing.
 
 **Run the Dagster UI (Docker):**
 
